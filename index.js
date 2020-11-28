@@ -42,7 +42,7 @@ setInterval(() => {
             try {
                 const res = await axios(product.url);
 
-                if(res.status !== 200) return console.log(`ERROR (${store.name}): ${product.name}: Status Code ${res.status}`);
+                if(res.status !== 200) return new Error(`ERROR (${store.name}): ${product.name}: Status Code ${res.status}`);
         
                 const $ = cheerio.load(res.data);
 
@@ -81,5 +81,5 @@ setInterval(() => {
 
         })
     })
-}, 5000)
+}, 30000)
 
