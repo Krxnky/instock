@@ -1,0 +1,27 @@
+{
+  "name": "instock",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Krxnky/instock.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Krxnky/instock/issues"
+  },
+  "homepage": "https://github.com/Krxnky/instock#readme",
+  "dependencies": {
+    "axios": "^0.21.0",
+    "cheerio": "^1.0.0-rc.3",
+    "discord.js": "^12.5.1"
+  },
+  "engines": {
+    "node": "12.x"
+  }
+}
