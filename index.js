@@ -31,7 +31,7 @@ const sendError = (avatar, username, product, error) => {
     .setTitle(`Error occurred whilst checking \`${product}\``)
     .setDescription('```\n' + error.toString() + '\n```')
 
-    Webhook.send({ embeds: [embed], content: '<@302599378332549121>' });
+    Webhook.send({ embeds: [embed] });
 }
 
 let check = 1;
