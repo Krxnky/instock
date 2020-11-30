@@ -113,7 +113,22 @@ module.exports = [
                 name: 'RTX 3090',
                 type: 'search',
                 url: 'https://www.newegg.com/p/pl?N=100007709%204841%20601357248'
-            }
+            },
+            {
+                name: 'RTX 3070 Combo',
+                type: 'search',
+                url: 'https://www.newegg.com/p/pl?d=rtx+3070+combo'
+            },
+            {
+                name: 'RTX 3080 Combo',
+                type: 'search',
+                url: 'https://www.newegg.com/p/pl?d=rtx+3080+combo'
+            },
+            {
+                name: 'RTX 3090 Combo',
+                type: 'search',
+                url: 'https://www.newegg.com/p/pl?d=rtx+3090+combo'
+            },
         ]
     },
     // {

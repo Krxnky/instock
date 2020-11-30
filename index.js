@@ -59,7 +59,7 @@ setInterval(() => {
                             const productName = $(store.selectors[product.type].name, this).text();
                             const price = $(store.selectors[product.type].price, this).text().trim();
                             const url = $(store.selectors[product.type].url, this).attr('href');
-                            if(store.name == 'Micro Center') console.log(status, productName)
+
                             if(!store.excluded_flags.includes(status) && store.included_flags.includes(status)) {
                                 results.push({ productName, price, productImage, url })
                             }
