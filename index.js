@@ -58,7 +58,9 @@ setInterval(() => {
                     const $ = cheerio.load(res.data, { headers: (store.headers) ? store.headers : {} });
 
                     if(product.type == 'search') {
-                        $(store.selectors[product.type].item).each(function() {
+                        const items = $(store.selectors[product.type].item);
+                        console.log(`INFO (${store.name}) (${product.name}): Found ${items.length}`);
+                        items.each(function() {
                             const status = $(store.selectors[product.type].status, this).text().trim();
                             const productImage = $(store.selectors[product.type].image, this).attr('src');
                             const productName = $(store.selectors[product.type].name, this).text();
