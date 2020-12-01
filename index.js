@@ -59,7 +59,7 @@ setInterval(() => {
 
                     if(product.type == 'search') {
                         const items = $(store.selectors[product.type].item);
-                        console.log(`INFO (${store.name}) (${product.name}): Found ${items.length}`);
+                        console.log(`INFO (${store.name}) (${product.name}): Found ${items.toArray().length}`);
                         items.each(function() {
                             const status = $(store.selectors[product.type].status, this).text().trim();
                             const productImage = $(store.selectors[product.type].image, this).attr('src');
