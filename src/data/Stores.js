@@ -56,7 +56,7 @@ module.exports = [
         image: 'https://pisces.bbystatic.com/image2/BestBuy_US/Gallery/BestBuy_Logo_2020-190616.png',
         name: 'Best Buy',
         type: ScanType.API,
-        request_delay: 1500,
+        request_delay: 5000,
         selectors: {
             item: 'products',
             image: 'images[0].href',
@@ -86,6 +86,7 @@ module.exports = [
         image: 'https://c1.neweggimages.com/WebResource/Themes/2005/Nest/logo_424x210.png',
         name: 'Newegg',
         type: ScanType.SCRAPE,
+        request_delay: 5000,
         selectors: {
             search: {
                 item: '.item-cell',
@@ -117,18 +118,18 @@ module.exports = [
             {
                 name: 'RTX 3070 Combo',
                 type: 'search',
-                url: 'https://www.newegg.com/p/pl?d=rtx+3070+combo'
+                url: 'https://www.newegg.com/p/pl?d=rtx+3070+combo&N=31001489&isdeptsrh=1'
             },
             {
                 name: 'RTX 3080 Combo',
                 type: 'search',
-                url: 'https://www.newegg.com/p/pl?d=rtx+3080+combo'
+                url: 'https://www.newegg.com/p/pl?d=rtx+3080+combo&N=31001489&isdeptsrh=1'
             },
             {
                 name: 'RTX 3090 Combo',
                 type: 'search',
-                url: 'https://www.newegg.com/p/pl?d=rtx+3090+combo'
-            },
+                url: 'https://www.newegg.com/p/pl?d=rtx+3090+combo&N=31001489&isdeptsrh=1'
+            }
         ]
     },
     // {

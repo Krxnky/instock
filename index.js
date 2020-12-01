@@ -45,7 +45,12 @@ setInterval(() => {
             const results = [];
             try {
                 if(store.request_delay) await util.sleep(store.request_delay);
-                const res = await axios(product.url);
+                const options = {
+                    headers: {
+                        'User-Agent': util.getRandomUserAgent()
+                    }
+                }
+                const res = await axios(product.url, options);
 
                 if(res.status !== 200) return new Error(`ERROR (${store.name}): ${product.name}: Status Code ${res.status}`);
         
@@ -100,5 +105,5 @@ setInterval(() => {
             }
         }
     })
-}, 30000)
+}, 60000)
 
