@@ -1,13 +1,15 @@
 const _ = require('lodash');
 const axios = require('axios');
-const cheerio = require('cheerio');
+const puppeteer = require('puppeteer');
 const Discord = require('discord.js');
+const TimeoutManger = require('./src/classes/TimeoutManager');
 
 const Webhook = new Discord.WebhookClient('782073864423079956', 'Jo2ohjAaUCpftzfiqtaH0ml7aPNJd6mXOln6hhuvw7MLHRhd7TE72s4vIPcQsikiTldq');
 
 const util = require('./src/util/util');
 const Stores = require('./src/data/Stores');
 const ScanType = require('./src/enums/ScanType');
+const timeoutManager = new TimeoutManger(5 * 60000);
 
 const sendNotification = (avatar, username, name, productName, status, price, image, url) => {
     const embed = new Discord.MessageEmbed()
@@ -34,78 +36,87 @@ const sendError = (avatar, username, product, error) => {
     Webhook.send({ embeds: [embed] });
 }
 
-let check = 1;
-setInterval(() => {
-    console.clear();
-    console.log(`Annual check #${check++}`)
-    console.log(`Checking stock for: ${Stores.map((store) => store.name).join(', ')}`)
-    Stores.forEach(async (store) => {
-        for (const product of store.products) {
-            console.log(`INFO (${store.name}): Checking ${product.name}`);
-            const results = [];
-            try {
-                if(store.request_delay) await util.sleep(store.request_delay);
-                const options = {
-                    headers: {
-                        'User-Agent': util.getRandomUserAgent()
+(async () => {
+    const browser = await puppeteer.launch();
+    let check = 1;
+    setInterval(() => {
+        console.clear();
+        console.log(`Annual check #${check++}`)
+        console.log(`Checking stock for: ${Stores.map((store) => store.name).join(', ')}`)
+        Stores.forEach(async (store) => {
+            console.time(store.name);
+            const page = await browser.newPage();
+            for (const product of store.products) {
+                console.log(`INFO (${store.name}): Checking ${product.name}`);
+                const results = [];
+                try {
+                    if(store.request_delay) await util.sleep(store.request_delay);
+                    if(store.type == ScanType.SCRAPE) {
+                        await page.goto(product.url);
+                        const productStatus = await page.evaluate((store, product) => {
+                            const result = [];
+                            let total = 0;
+                            if(product.type == 'search') {
+                                const items = document.querySelectorAll(store.selectors[product.type].item);
+                                total = items.length;
+                                for (const item of items) {
+                                    const status = item.querySelector(store.selectors[product.type].status).textContent.trim();
+                                    const productImage = item.querySelector(store.selectors[product.type].image).src;
+                                    const productName = item.querySelector(store.selectors[product.type].name).textContent;
+                                    const price = item.querySelector(store.selectors[product.type].price).textContent.trim()
+                                    const url = item.querySelector(store.selectors[product.type].url).href;
+
+                                    if(!store.excluded_flags.includes(status) && store.included_flags.includes(status) && !timeoutManager.isTimedOut(url)) {
+                                        result.push({ productName, price, productImage, status, url });
+                                        timeoutManager.timeoutProduct(url);
+                                    }
+                                }
+                            } else if(product.type == 'item') {
+                                const status = document.querySelector(store.selectors[product.type].status).text().trim();
+                                const productImage = document.querySelector(store.selectors[product.type].image).attr('src');
+                                const productName = document.querySelector(store.selectors[product.type].name,).text();
+                                const price = document.querySelector(store.selectors[product.type].price).text().trim();
+                                const url = product.url;
+            
+                                if(!store.excluded_flags.includes(status) && store.included_flags.includes(status) && !timeoutManager.isTimedOut(url)) {
+                                    result.push({ productName, price, productImage, status, url });
+                                    timeoutManager.timeoutProduct(url);
+                                }
+                            }
+
+                            return Promise.resolve({ results: result, total: total });
+                        }, store, product)
+                        console.log(`INFO (${store.name}) (${product.name}): Found ${productStatus.total}`);
+                        productStatus.results.forEach((status) => results.push(status));
                     }
-                }
-                const res = await axios(product.url, options);
+                    else if(store.type == ScanType.API) {
+                        const res = await axios(product.url);
+                        const items = _.get(res.data, store.selectors.item);
+                        console.log(`INFO (${store.name}) (${product.name}): Found ${items.length}`);
+                        items.forEach((item) => {
+                            const status = _.get(item, store.selectors.status);
+                            const productImage = _.get(item, store.selectors.image);
+                            const productName = _.get(item, store.selectors.name);
+                            const price = _.get(item, store.selectors.price);
+                            const url = _.get(item, store.selectors.url);
 
-                if(res.status !== 200) return new Error(`ERROR (${store.name}): ${product.name}: Status Code ${res.status}`);
-        
-                if(store.type == ScanType.SCRAPE) {
-                    const $ = cheerio.load(res.data, { headers: (store.headers) ? store.headers : {} });
-
-                    if(product.type == 'search') {
-                        const items = $(store.selectors[product.type].item);
-                        console.log(`INFO (${store.name}) (${product.name}): Found ${items.toArray().length}`);
-                        items.each(function() {
-                            const status = $(store.selectors[product.type].status, this).text().trim();
-                            const productImage = $(store.selectors[product.type].image, this).attr('src');
-                            const productName = $(store.selectors[product.type].name, this).text();
-                            const price = $(store.selectors[product.type].price, this).text().trim();
-                            const url = $(store.selectors[product.type].url, this).attr('href');
-
-                            if(!store.excluded_flags.includes(status) && store.included_flags.includes(status)) {
-                                results.push({ productName, price, productImage, url })
+                            if(!store.excluded_flags.includes(status) && store.included_flags.includes(status) && !timeoutManager.isTimedOut(url)) {
+                                results.push({ productName, price, productImage, status, url });
+                                timeoutManager.timeoutProduct(url);
                             }
                         })
-                    } else if(product.type == 'item') {
-                        const status = $(store.selectors[product.type].status).text().trim();
-                        const productImage = $(store.selectors[product.type].image).attr('src');
-                        const productName = $(store.selectors[product.type].name,).text();
-                        const price = $(store.selectors[product.type].price).text().trim();
-                        const url = product.url;
-    
-                        if(!store.excluded_flags.includes(status) && store.included_flags.includes(status)) {
-                            results.push({ productName, price, productImage, url })
-                        }
                     }
-                }
-                else if(store.type == ScanType.API) {
-                    const items = _.get(res.data, store.selectors.item);
-                    items.forEach((item) => {
-                        const status = _.get(item, store.selectors.status);
-                        const productImage = _.get(item, store.selectors.image);
-                        const productName = _.get(item, store.selectors.name);
-                        const price = _.get(item, store.selectors.price);
-                        const url = _.get(item, store.selectors.url);
-
-                        if(!store.excluded_flags.includes(status) && store.included_flags.includes(status)) {
-                            results.push({ productName, price, productImage, url })
-                        }
+                    console.log(`INFO (${store.name}): Found ${results.length} in stock`)
+                    results.forEach((result) => {
+                        sendNotification(store.image, store.name, product.name, result.productName, result.status, result.price, result.productImage, result.url);
                     })
+                } catch (error) {
+                    console.log(`ERROR (${store.name}): ${product.name}: ${error}`);
+                    sendError(store.image, store.name, product.name, error);
                 }
-                console.log(`INFO (${store.name}): Found ${results.length} in stock`)
-                results.forEach((result) => {
-                    sendNotification(store.image, store.name, product.name, result.productName, 'In Stock', result.price, result.productImage, result.url);
-                })
-            } catch (error) {
-                console.log(`ERROR (${store.name}): ${product.name}: ${error}`);
-                sendError(store.image, store.name, product.name, error);
             }
-        }
-    })
-}, 60000)
-
+            page.close();
+            console.timeEnd(store.name);
+        })
+    }, 60000)
+})();

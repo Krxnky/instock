@@ -20,7 +20,8 @@
     "axios": "^0.21.0",
     "cheerio": "^1.0.0-rc.3",
     "discord.js": "^12.5.1",
-    "lodash": "^4.17.20"
+    "lodash": "^4.17.20",
+    "puppeteer": "^5.5.0"
   },
   "engines": {
     "node": "12.x"

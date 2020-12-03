@@ -76,10 +76,10 @@ module.exports = [
                 name: 'RTX 3080',
                 url: 'https://api.bestbuy.com/v1/products((search=rtx&search=3080)&(categoryPath.id=abcat0507002))?apiKey=ooXTLEqUWOQkyIR6WmdGuDqy&format=json'
             },
-            {
-                name: 'RTX 3090',
-                url: 'https://api.bestbuy.com/v1/products((search=rtx&search=3090)&(categoryPath.id=abcat0507002))?apiKey=ooXTLEqUWOQkyIR6WmdGuDqy&format=json'
-            }
+            // {
+            //     name: 'RTX 3090',
+            //     url: 'https://api.bestbuy.com/v1/products((search=rtx&search=3090)&(categoryPath.id=abcat0507002))?apiKey=ooXTLEqUWOQkyIR6WmdGuDqy&format=json'
+            // }
         ]
     },
     {
@@ -89,7 +89,7 @@ module.exports = [
         request_delay: 5000,
         selectors: {
             search: {
-                item: '.item-cell',
+                item: '.item-cell .item-container',
                 image: '.item-img img',
                 status: '.item-button-area',
                 name: '.item-title',
@@ -110,11 +110,11 @@ module.exports = [
                 type: 'search',
                 url: 'https://www.newegg.com/p/pl?N=100007709%20601357247%204841'
             },
-            {
-                name: 'RTX 3090',
-                type: 'search',
-                url: 'https://www.newegg.com/p/pl?N=100007709%204841%20601357248'
-            },
+            // {
+            //     name: 'RTX 3090',
+            //     type: 'search',
+            //     url: 'https://www.newegg.com/p/pl?N=100007709%204841%20601357248'
+            // },
             {
                 name: 'RTX 3070 Combo',
                 type: 'search',
@@ -125,11 +125,11 @@ module.exports = [
                 type: 'search',
                 url: 'https://www.newegg.com/p/pl?d=rtx+3080+combo&N=31001489&isdeptsrh=1'
             },
-            {
-                name: 'RTX 3090 Combo',
-                type: 'search',
-                url: 'https://www.newegg.com/p/pl?d=rtx+3090+combo&N=31001489&isdeptsrh=1'
-            }
+            // {
+            //     name: 'RTX 3090 Combo',
+            //     type: 'search',
+            //     url: 'https://www.newegg.com/p/pl?d=rtx+3090+combo&N=31001489&isdeptsrh=1'
+            // }
         ]
     },
     // {
