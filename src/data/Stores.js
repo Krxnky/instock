@@ -52,41 +52,41 @@ const ScanType = require('../enums/ScanType');
     // },
 
 module.exports = [
-    {
-        image: 'https://pisces.bbystatic.com/image2/BestBuy_US/Gallery/BestBuy_Logo_2020-190616.png',
-        name: 'Best Buy',
-        type: ScanType.API,
-        request_delay: 5000,
-        selectors: {
-            item: 'products',
-            image: 'images[0].href',
-            status: 'orderable',
-            name: 'name',
-            price: 'regularPrice',
-            url: 'url'
-        },
-        excluded_flags: ['SoldOut', 'AutoNotify', 'ComingSoon'],
-        included_flags: ['Available'],
-        products: [
-            {
-                name: 'RTX 3070',
-                url: 'https://api.bestbuy.com/v1/products((search=rtx&search=3070)&(categoryPath.id=abcat0507002))?apiKey=ooXTLEqUWOQkyIR6WmdGuDqy&format=json'
-            },
-            {
-                name: 'RTX 3080',
-                url: 'https://api.bestbuy.com/v1/products((search=rtx&search=3080)&(categoryPath.id=abcat0507002))?apiKey=ooXTLEqUWOQkyIR6WmdGuDqy&format=json'
-            },
-            // {
-            //     name: 'RTX 3090',
-            //     url: 'https://api.bestbuy.com/v1/products((search=rtx&search=3090)&(categoryPath.id=abcat0507002))?apiKey=ooXTLEqUWOQkyIR6WmdGuDqy&format=json'
-            // }
-        ]
-    },
+    // {
+    //     image: 'https://pisces.bbystatic.com/image2/BestBuy_US/Gallery/BestBuy_Logo_2020-190616.png',
+    //     name: 'Best Buy',
+    //     type: ScanType.API,
+    //     request_delay: 5000,
+    //     selectors: {
+    //         item: 'products',
+    //         image: 'images[0].href',
+    //         status: 'orderable',
+    //         name: 'name',
+    //         price: 'regularPrice',
+    //         url: 'url'
+    //     },
+    //     excluded_flags: ['SoldOut', 'AutoNotify', 'ComingSoon'],
+    //     included_flags: ['Available'],
+    //     products: [
+    //         {
+    //             name: 'RTX 3070',
+    //             url: 'https://api.bestbuy.com/v1/products((search=rtx&search=3070)&(categoryPath.id=abcat0507002))?apiKey=ooXTLEqUWOQkyIR6WmdGuDqy&format=json'
+    //         },
+    //         {
+    //             name: 'RTX 3080',
+    //             url: 'https://api.bestbuy.com/v1/products((search=rtx&search=3080)&(categoryPath.id=abcat0507002))?apiKey=ooXTLEqUWOQkyIR6WmdGuDqy&format=json'
+    //         },
+    //         // {
+    //         //     name: 'RTX 3090',
+    //         //     url: 'https://api.bestbuy.com/v1/products((search=rtx&search=3090)&(categoryPath.id=abcat0507002))?apiKey=ooXTLEqUWOQkyIR6WmdGuDqy&format=json'
+    //         // }
+    //     ]
+    // },
     {
         image: 'https://c1.neweggimages.com/WebResource/Themes/2005/Nest/logo_424x210.png',
         name: 'Newegg',
-        type: ScanType.SCRAPE,
         request_delay: 5000,
+        type: ScanType.SCRAPE,
         selectors: {
             search: {
                 item: '.item-cell .item-container',

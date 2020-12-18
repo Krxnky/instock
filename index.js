@@ -1,8 +1,11 @@
 const _ = require('lodash');
 const axios = require('axios');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
 const Discord = require('discord.js');
 const TimeoutManger = require('./src/classes/TimeoutManager');
+
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin())
 
 const Webhook = new Discord.WebhookClient('782073864423079956', 'Jo2ohjAaUCpftzfiqtaH0ml7aPNJd6mXOln6hhuvw7MLHRhd7TE72s4vIPcQsikiTldq');
 
@@ -108,6 +111,7 @@ const sendError = (avatar, username, product, error) => {
                     }
                     console.log(`INFO (${store.name}): Found ${results.length} in stock`)
                     results.forEach((result) => {
+                        console.log(`!!!RESTOCK!!! ${result.url} (${result.name}) (${store.name}) `)
                         sendNotification(store.image, store.name, product.name, result.productName, result.status, result.price, result.productImage, result.url);
                     })
                 } catch (error) {
@@ -118,5 +122,5 @@ const sendError = (avatar, username, product, error) => {
             page.close();
             console.timeEnd(store.name);
         })
-    }, 60000)
+    }, Math.floor(Math.random() * ((2 * 60000) - (.90 * 60000)) + (.90 * 60000)))
 })();
