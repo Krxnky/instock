@@ -10,6 +10,8 @@ puppeteer.use(StealthPlugin())
 const Webhook = new Discord.WebhookClient('782073864423079956', 'Jo2ohjAaUCpftzfiqtaH0ml7aPNJd6mXOln6hhuvw7MLHRhd7TE72s4vIPcQsikiTldq');
 
 const util = require('./src/util/util');
+const logger = require('./src/util/Logger');
+
 const Stores = require('./src/data/Stores');
 const ScanType = require('./src/enums/ScanType');
 const timeoutManager = new TimeoutManger(5 * 60000);
@@ -40,17 +42,18 @@ const sendError = (avatar, username, product, error) => {
 }
 
 (async () => {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({});
     let check = 1;
     setInterval(() => {
         console.clear();
-        console.log(`Annual check #${check++}`)
-        console.log(`Checking stock for: ${Stores.map((store) => store.name).join(', ')}`)
+        logger.info(`Annual check #${check++}`)
+        logger.info(`Checking stock for: ${Stores.filter((s) => s.enabled).map((store) => store.name).join(', ')}`)
         Stores.forEach(async (store) => {
+            if(store.enabled == false) return;
             console.time(store.name);
             const page = await browser.newPage();
             for (const product of store.products) {
-                console.log(`INFO (${store.name}): Checking ${product.name}`);
+                logger.info(`(${store.name}): Checking ${product.name}`);
                 const results = [];
                 try {
                     if(store.request_delay) await util.sleep(store.request_delay);
@@ -65,13 +68,12 @@ const sendError = (avatar, username, product, error) => {
                                 for (const item of items) {
                                     const status = item.querySelector(store.selectors[product.type].status).textContent.trim();
                                     const productImage = item.querySelector(store.selectors[product.type].image).src;
-                                    const productName = item.querySelector(store.selectors[product.type].name).textContent;
+                                    const productName = item.querySelector(store.selectors[product.type].name).textContent.trim();
                                     const price = item.querySelector(store.selectors[product.type].price).textContent.trim()
                                     const url = item.querySelector(store.selectors[product.type].url).href;
 
-                                    if(!store.excluded_flags.includes(status) && store.included_flags.includes(status) && !timeoutManager.isTimedOut(url)) {
+                                    if(!store.excluded_flags.includes(status) && store.included_flags.includes(status)) {
                                         result.push({ productName, price, productImage, status, url });
-                                        timeoutManager.timeoutProduct(url);
                                     }
                                 }
                             } else if(product.type == 'item') {
@@ -81,21 +83,20 @@ const sendError = (avatar, username, product, error) => {
                                 const price = document.querySelector(store.selectors[product.type].price).text().trim();
                                 const url = product.url;
             
-                                if(!store.excluded_flags.includes(status) && store.included_flags.includes(status) && !timeoutManager.isTimedOut(url)) {
+                                if(!store.excluded_flags.includes(status) && store.included_flags.includes(status)) {
                                     result.push({ productName, price, productImage, status, url });
-                                    timeoutManager.timeoutProduct(url);
                                 }
                             }
 
                             return Promise.resolve({ results: result, total: total });
                         }, store, product)
-                        console.log(`INFO (${store.name}) (${product.name}): Found ${productStatus.total}`);
+                        logger.info(`(${store.name}) (${product.name}): Found ${productStatus.total}`);
                         productStatus.results.forEach((status) => results.push(status));
                     }
                     else if(store.type == ScanType.API) {
                         const res = await axios(product.url);
                         const items = _.get(res.data, store.selectors.item);
-                        console.log(`INFO (${store.name}) (${product.name}): Found ${items.length}`);
+                        logger.info(`(${store.name}) (${product.name}): Found ${items.length}`);
                         items.forEach((item) => {
                             const status = _.get(item, store.selectors.status);
                             const productImage = _.get(item, store.selectors.image);
@@ -103,19 +104,21 @@ const sendError = (avatar, username, product, error) => {
                             const price = _.get(item, store.selectors.price);
                             const url = _.get(item, store.selectors.url);
 
-                            if(!store.excluded_flags.includes(status) && store.included_flags.includes(status) && !timeoutManager.isTimedOut(url)) {
+                            if(!store.excluded_flags.includes(status) && store.included_flags.includes(status)) {
                                 results.push({ productName, price, productImage, status, url });
-                                timeoutManager.timeoutProduct(url);
                             }
                         })
                     }
-                    console.log(`INFO (${store.name}): Found ${results.length} in stock`)
+                    logger.info(`(${store.name}): Found ${results.length} in stock`)
                     results.forEach((result) => {
-                        console.log(`!!!RESTOCK!!! ${result.url} (${result.name}) (${store.name}) `)
-                        sendNotification(store.image, store.name, product.name, result.productName, result.status, result.price, result.productImage, result.url);
+                        if(!timeoutManager.isTimedOut(result.url)) {
+                            timeoutManager.timeoutProduct(result.url);
+                            logger.info(`!!!RESTOCK!!! ${result.url} (${result.productName}) (${store.name}) `);
+                            sendNotification(store.image, store.name, product.name, result.productName, result.status, result.price, result.productImage, result.url);
+                        }
                     })
                 } catch (error) {
-                    console.log(`ERROR (${store.name}): ${product.name}: ${error}`);
+                    logger.error(`ERROR (${store.name}): ${product.name}: ${error}`);
                     sendError(store.image, store.name, product.name, error);
                 }
             }
