@@ -123,7 +123,7 @@ module.exports = [
     {
         image: 'https://logodix.com/logo/695365.png',
         name: 'Micro Center',
-        enabled: true,
+        enabled: false,
         request_delay: 1000,
         type: ScanType.SCRAPE,
         selectors: {
@@ -137,7 +137,7 @@ module.exports = [
             }
         },
         excluded_flags: ['Sold Out', 'Not Carried In This Store'],
-        included_flags: ['in stock'],
+        included_flags: ['in stock', 'Limited Availabilty'],
         products: [
             {
                 name: 'RTX 3070',
