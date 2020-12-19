@@ -130,7 +130,7 @@ module.exports = [
             search: {
                 item: '.product_wrapper',
                 image: '.result_left a img',
-                status: '.result_right .details .detail_wrapper .stock span',
+                status: '.result_right .details .detail_wrapper .stock',
                 name: '.result_right .details .detail_wrapper .pDescription .normal',
                 price: '.result_right .details .price_wrapper .price span',
                 url: '.result_right .details .detail_wrapper .pDescription .normal h2 a'
