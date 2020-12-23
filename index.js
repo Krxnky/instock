@@ -44,6 +44,7 @@ const sendError = (avatar, username, product, error) => {
 
 (async () => {
     const browser = await puppeteer.launch({});
+    Webhook.send('Starting anual checks...');
     let check = 1;
     setInterval(async () => {
         console.clear();
