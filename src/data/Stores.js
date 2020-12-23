@@ -83,7 +83,7 @@ module.exports = [
         image: 'https://c1.neweggimages.com/WebResource/Themes/2005/Nest/logo_424x210.png',
         name: 'Newegg',
         enabled: true,
-        request_delay: 5000,
+        request_delay: 2500,
         type: ScanType.SCRAPE,
         selectors: {
             search: {

@@ -44,11 +44,11 @@ const sendError = (avatar, username, product, error) => {
 (async () => {
     const browser = await puppeteer.launch({});
     let check = 1;
-    setInterval(() => {
+    setInterval(async () => {
         console.clear();
         logger.info(`Annual check #${check++}`)
         logger.info(`Checking stock for: ${Stores.filter((s) => s.enabled).map((store) => store.name).join(', ')}`)
-        Stores.forEach(async (store) => {
+        for(const store of Stores) {
             if(store.enabled == false) return;
             console.time(store.name);
             const page = await browser.newPage();
@@ -124,6 +124,6 @@ const sendError = (avatar, username, product, error) => {
             }
             page.close();
             console.timeEnd(store.name);
-        })
+        }
     }, Math.floor(Math.random() * ((2 * 60000) - (.90 * 60000)) + (.90 * 60000)))
 })();
