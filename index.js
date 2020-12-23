@@ -19,16 +19,17 @@ const timeoutManager = new TimeoutManger(5 * 60000);
 const sendNotification = (avatar, username, name, productName, status, price, image, url) => {
     const embed = new Discord.MessageEmbed()
     .setAuthor(username, avatar)
-    .setColor('#32CD32')
+    .setColor('#0098FA')
     .setThumbnail(image)
     .setTitle(`${name} Restock`)
     .setDescription(`[${productName}](${encodeURI(url)})`)
+    .addField('Product', encodeURI(url))
     .addField('Price', (price) ? price : 'No price', true)
     .addField('Status', status, true)
     .setTimestamp()
     .setFooter('Developed by Krxnky#1274')
 
-    Webhook.send({ embeds: [embed], content: '<@302599378332549121>' });
+    Webhook.send({ embeds: [embed], content: ':rotating_light: Stock Update :rotating_light: <@302599378332549121>' });
 }
 
 const sendError = (avatar, username, product, error) => {
@@ -48,8 +49,7 @@ const sendError = (avatar, username, product, error) => {
         console.clear();
         logger.info(`Annual check #${check++}`)
         logger.info(`Checking stock for: ${Stores.filter((s) => s.enabled).map((store) => store.name).join(', ')}`)
-        for(const store of Stores) {
-            if(store.enabled == false) return;
+        for(const store of Stores.filter((s) => s.enabled)) {
             console.time(store.name);
             const page = await browser.newPage();
             for (const product of store.products) {
