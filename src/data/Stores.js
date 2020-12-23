@@ -123,7 +123,7 @@ module.exports = [
     {
         image: 'https://logodix.com/logo/695365.png',
         name: 'Micro Center',
-        enabled: false,
+        enabled: true,
         request_delay: 1000,
         type: ScanType.SCRAPE,
         selectors: {
