@@ -1,3 +1,4 @@
+require('dotenv').config();
 const _ = require('lodash');
 const cron = require('cron').CronJob;
 const axios = require('axios');
@@ -8,19 +9,19 @@ const TimeoutManger = require('./src/classes/TimeoutManager');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin())
 
-const Webhook = new Discord.WebhookClient('782073864423079956', 'Jo2ohjAaUCpftzfiqtaH0ml7aPNJd6mXOln6hhuvw7MLHRhd7TE72s4vIPcQsikiTldq');
-
 const util = require('./src/util/util');
 const logger = require('./src/util/Logger');
 
 const Stores = require('./src/data/Stores');
 const ScanType = require('./src/enums/ScanType');
+const Channels = require('./src/enums/Channels');
+const bot = new Discord.Client();
 const timeoutManager = new TimeoutManger(5 * 60000);
 
-const sendNotification = (avatar, username, name, productName, status, price, image, url) => {
+const sendNotification = (channel, avatar, username, name, productName, status, price, image, url) => {
     const embed = new Discord.MessageEmbed()
     .setAuthor(username, avatar)
-    .setColor('#0098FA')
+    .setColor('#5ACE7D')
     .setThumbnail(image)
     .setTitle(`${name} Restock`)
     .setDescription(`[${productName}](${encodeURI(url)})`)
@@ -30,7 +31,8 @@ const sendNotification = (avatar, username, name, productName, status, price, im
     .setTimestamp()
     .setFooter('Developed by Krxnky#1274')
 
-    Webhook.send({ embeds: [embed], content: ':rotating_light: Stock Update :rotating_light: <@302599378332549121>' });
+    bot.channels.fetch(channel)
+        .then((c) => c.send({ embed: embed, content: ':rotating_light: Stock Update :rotating_light: <@302599378332549121>' }));
 }
 
 const sendError = (avatar, username, product, error) => {
@@ -40,16 +42,21 @@ const sendError = (avatar, username, product, error) => {
     .setTitle(`Error occurred whilst checking \`${product}\``)
     .setDescription('```\n' + error.toString() + '\n```')
 
-    Webhook.send({ embeds: [embed] });
+    bot.channels.fetch(Channels.LOGS)
+        .then((c) => c.send(embed));
 }
 
 (async () => {
+    await bot.login(process.env.TOKEN);
     const browser = await puppeteer.launch({});
-    Webhook.send('Starting anual checks...');
-    let check = 1;
-    new cron('0 */1 * * * *', async () => {
+
+    bot.channels.fetch(Channels.LOGS)
+        .then((c) => c.send('Anual checks started...'));
+    
+    bot.stock_check = 1;
+    const loop = new cron('5 */1 * * * *', async () => {
         console.clear();
-        logger.info(`Annual check #${check++}`)
+        logger.info(`Annual check #${bot.stock_check++}`)
         logger.info(`Checking stock for: ${Stores.filter((s) => s.enabled).map((store) => store.name).join(', ')}`)
         for(const store of Stores.filter((s) => s.enabled)) {
             console.time(store.name);
@@ -117,7 +124,7 @@ const sendError = (avatar, username, product, error) => {
                         if(!timeoutManager.isTimedOut(result.url)) {
                             timeoutManager.timeoutProduct(result.url);
                             logger.info(`!!!RESTOCK!!! ${result.url} (${result.productName}) (${store.name}) `);
-                            sendNotification(store.image, store.name, product.name, result.productName, result.status, result.price, result.productImage, result.url);
+                            sendNotification(product.channel, store.image, store.name, product.name, result.productName, result.status, result.price, result.productImage, result.url);
                         }
                     })
                 } catch (error) {
@@ -128,5 +135,39 @@ const sendError = (avatar, username, product, error) => {
             page.close();
             console.timeEnd(store.name);
         }
-    }).start();
+    })
+    loop.start();
+
+    bot.on('message', async (message) => {
+        const prefix = '.';
+        const messageArray = message.content.split(' ');
+        const cmd = messageArray[0].toLowerCase();
+        const args = messageArray.slice(1);
+
+        if(message.author.bot) return;
+        if(cmd.substring(0, prefix.length) !== prefix) return;
+
+        switch(cmd.slice(prefix.length)) {
+            case 'stoploop': 
+                loop.stop();
+                message.channel.send(':white_check_mark: \`Stock loop ended...\`');
+            break;
+
+            case 'startloop':
+                loop.start();
+                message.channel.send(':white_check_mark: \`Stock loop started...\`');
+            break;
+
+            case 'setcron': 
+                if(args.length < 6) return message.channel.send(':x: \`Invalid cron time...\`')
+                loop.setTime(args.join(' '));
+                message.channel.send(':white_check_mark: \`Cron time changed...\`');
+            break;
+
+            case 'nextcheck':
+                message.channel.send(`Next Stock Check: \`${loop.nextDate().format('dddd hh:mm:ss')}\``)
+            break;
+        }
+    })
+
 })();

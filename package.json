@@ -21,6 +21,7 @@
     "cheerio": "^1.0.0-rc.3",
     "cron": "^1.8.2",
     "discord.js": "^12.5.1",
+    "dotenv": "^8.2.0",
     "lodash": "^4.17.20",
     "puppeteer": "^5.5.0",
     "puppeteer-extra": "^3.1.15",

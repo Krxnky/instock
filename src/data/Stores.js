@@ -1,4 +1,5 @@
 const ScanType = require('../enums/ScanType');
+const Channels = require('../enums/Channels');
 
 module.exports = [
     {
@@ -20,11 +21,13 @@ module.exports = [
         products: [
             {
                 name: 'RTX 3070',
-                url: 'https://api.bestbuy.com/v1/products((search=rtx&search=3070)&(categoryPath.id=abcat0507002))?apiKey=ooXTLEqUWOQkyIR6WmdGuDqy&format=json'
+                url: 'https://api.bestbuy.com/v1/products((search=rtx&search=3070)&(categoryPath.id=abcat0507002))?apiKey=ooXTLEqUWOQkyIR6WmdGuDqy&format=json',
+                channel: Channels.RTX_3070
             },
             {
                 name: 'RTX 3080',
-                url: 'https://api.bestbuy.com/v1/products((search=rtx&search=3080)&(categoryPath.id=abcat0507002))?apiKey=ooXTLEqUWOQkyIR6WmdGuDqy&format=json'
+                url: 'https://api.bestbuy.com/v1/products((search=rtx&search=3080)&(categoryPath.id=abcat0507002))?apiKey=ooXTLEqUWOQkyIR6WmdGuDqy&format=json',
+                channel: Channels.RTX_3080
             }
         ]
     },
@@ -50,22 +53,26 @@ module.exports = [
             {
                 name: 'RTX 3070',
                 type: 'search',
-                url: 'https://www.newegg.com/p/pl?N=100007709%204841%20601357250'
+                url: 'https://www.newegg.com/p/pl?N=100007709%204841%20601357250',
+                channel: Channels.RTX_3070
             },
             {
                 name: 'RTX 3080',
                 type: 'search',
-                url: 'https://www.newegg.com/p/pl?N=100007709%20601357247%204841'
+                url: 'https://www.newegg.com/p/pl?N=100007709%20601357247%204841',
+                channel: Channels.RTX_3080
             },
             {
                 name: 'RTX 3070 Combo',
                 type: 'search',
-                url: 'https://www.newegg.com/p/pl?d=rtx+3070+combo&N=31001489&isdeptsrh=1'
+                url: 'https://www.newegg.com/p/pl?d=rtx+3070+combo&N=31001489&isdeptsrh=1',
+                channel: Channels.RTX_3070
             },
             {
                 name: 'RTX 3080 Combo',
                 type: 'search',
-                url: 'https://www.newegg.com/p/pl?d=rtx+3080+combo&N=31001489&isdeptsrh=1'
+                url: 'https://www.newegg.com/p/pl?d=rtx+3080+combo&N=31001489&isdeptsrh=1',
+                channel: Channels.RTX_3080
             }
         ]
     },
@@ -91,12 +98,14 @@ module.exports = [
             {
                 name: 'RTX 3070',
                 type: 'search',
-                url: 'https://www.bhphotovideo.com/c/buy/rtx-3070/ci/48849'
+                url: 'https://www.bhphotovideo.com/c/buy/rtx-3070/ci/48849',
+                channel: Channels.RTX_3070
             },
             {
                 name: 'RTX 3080',
                 type: 'search',
-                url: 'https://www.bhphotovideo.com/c/buy/rtx-3080/ci/48452'
+                url: 'https://www.bhphotovideo.com/c/buy/rtx-3080/ci/48452',
+                channel: Channels.RTX_3080
             }
         ]
     },
@@ -122,12 +131,14 @@ module.exports = [
             {
                 name: 'RTX 3070',
                 type: 'search',
-                url: 'https://www.microcenter.com/search/search_results.aspx?Ntk=all&Ntt=rtx%203070&sortby=match&N=4294966937&storeid=155'
+                url: 'https://www.microcenter.com/search/search_results.aspx?Ntk=all&Ntt=rtx%203070&sortby=match&N=4294966937&storeid=155',
+                channel: Channels.RTX_3070
             },
             {
                 name: 'RTX 3080',
                 type: 'search',
-                url: 'https://www.microcenter.com/search/search_results.aspx?Ntk=all&Ntt=rtx%203080&sortby=match&N=4294966937&storeid=155'
+                url: 'https://www.microcenter.com/search/search_results.aspx?Ntk=all&Ntt=rtx%203080&sortby=match&N=4294966937&storeid=155',
+                channel: Channels.RTX_3080
             }
         ]
     }
