@@ -16,14 +16,13 @@ const Stores = require('./src/data/Stores');
 const ScanType = require('./src/enums/ScanType');
 const Channels = require('./src/enums/Channels');
 const bot = new Discord.Client();
-const timeoutManager = new TimeoutManger(5 * 60000);
+const timeoutManager = new TimeoutManger(30 * 60000);
 
 const sendNotification = (channel, avatar, username, name, productName, status, price, image, url) => {
     const embed = new Discord.MessageEmbed()
     .setAuthor(username, avatar)
     .setColor('#5ACE7D')
     .setThumbnail(image)
-    .setTitle(`${name} Restock`)
     .setDescription(`[${productName}](${encodeURI(url)})`)
     .addField('Product', encodeURI(url))
     .addField('Price', (price) ? price : 'No price', true)
