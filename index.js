@@ -165,7 +165,7 @@ const sendError = (avatar, username, product, error) => {
             break;
 
             case 'nextcheck':
-                message.channel.send(`Next Stock Check: \`${loop.nextDate().utcOffset(6).format('dddd hh:mm:ss')}\``)
+                message.channel.send(`Next Stock Check: \`${loop.nextDate().utcOffset(-6).format('dddd hh:mm:ss')}\``)
             break;
         }
     })
