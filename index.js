@@ -1,6 +1,6 @@
 require('dotenv').config();
 const _ = require('lodash');
-const cron = require('cron').CronJob;
+const { CronJob, CronTime } = require('cron');
 const axios = require('axios');
 const puppeteer = require('puppeteer-extra');
 const Discord = require('discord.js');
@@ -54,7 +54,7 @@ const sendError = (avatar, username, product, error) => {
         .then((c) => c.send('Anual checks started...'));
     
     bot.stock_check = 1;
-    const loop = new cron('5 */1 * * * *', async () => {
+    const loop = new CronJob('5 */1 * * * *', async () => {
         console.clear();
         logger.info(`Annual check #${bot.stock_check++}`)
         logger.info(`Checking stock for: ${Stores.filter((s) => s.enabled).map((store) => store.name).join(', ')}`)
