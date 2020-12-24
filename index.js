@@ -70,6 +70,7 @@ const sendError = (avatar, username, product, error) => {
                                     const status = item.querySelector(store.selectors[product.type].status).textContent.trim();
                                     const productImage = item.querySelector(store.selectors[product.type].image).src;
                                     const productName = item.querySelector(store.selectors[product.type].name).textContent.trim();
+                                    if(!item.querySelector(store.selectors[product.type].price)) continue;
                                     const price = item.querySelector(store.selectors[product.type].price).textContent.trim()
                                     const url = item.querySelector(store.selectors[product.type].url).href;
 
