@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const cron = require('cron').CronJob;
 const axios = require('axios');
 const puppeteer = require('puppeteer-extra');
 const Discord = require('discord.js');
@@ -46,7 +47,7 @@ const sendError = (avatar, username, product, error) => {
     const browser = await puppeteer.launch({});
     Webhook.send('Starting anual checks...');
     let check = 1;
-    setInterval(async () => {
+    new cron('0 */1 * * * *', async () => {
         console.clear();
         logger.info(`Annual check #${check++}`)
         logger.info(`Checking stock for: ${Stores.filter((s) => s.enabled).map((store) => store.name).join(', ')}`)
@@ -127,5 +128,5 @@ const sendError = (avatar, username, product, error) => {
             page.close();
             console.timeEnd(store.name);
         }
-    }, Math.floor(Math.random() * ((2 * 60000) - (.90 * 60000)) + (.90 * 60000)))
+    }).start();
 })();
