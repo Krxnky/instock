@@ -160,12 +160,12 @@ const sendError = (avatar, username, product, error) => {
 
             case 'setcron': 
                 if(args.length < 6) return message.channel.send(':x: \`Invalid cron time...\`')
-                loop.setTime(args.join(' '));
+                loop.setTime(new CronTime(args.join(' ')));
                 message.channel.send(':white_check_mark: \`Cron time changed...\`');
             break;
 
             case 'nextcheck':
-                message.channel.send(`Next Stock Check: \`${loop.nextDate().format('dddd hh:mm:ss')}\``)
+                message.channel.send(`Next Stock Check: \`${loop.nextDate().utcOffset(6).format('dddd hh:mm:ss')}\``)
             break;
         }
     })
