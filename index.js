@@ -104,7 +104,7 @@ const sendError = (store, product, error) => {
 
                             return Promise.resolve({ results: result, total: total });
                         }, store, product)
-                        if(productStatus.total == 0) throw 'No products found';
+                        if(productStatus.total <= 0) throw 'No products found';
                         logger.info(
                             Print.message(`Products Found: ${productStatus.total}`, product.name, store, true)
                         )
@@ -160,7 +160,7 @@ const sendError = (store, product, error) => {
     loop.start();
 
     bot.on('message', async (message) => {
-        const prefix = 't.';
+        const prefix = '.';
         const messageArray = message.content.split(' ');
         const cmd = messageArray[0].toLowerCase();
         const args = messageArray.slice(1);
@@ -195,6 +195,12 @@ const sendError = (store, product, error) => {
 
                 store.enabled = !store.enabled;
                 message.channel.send(`:white_check_mark: **Success!**\n\`Store: ${store.name}\nStatus: ${(store.enabled) ? 'Enabled' : 'Disabled'}\``);
+            break;
+
+            case 'setproducttimeout': 
+                if(isNaN(args[0])) return message.channel.send(':x: **Error!**\n`Timeout: Invalid`');
+                timeoutManager.delay = args[0];
+                message.channel.send(`:white_check_mark: **Success!**\n\`Timeout: ${args[0]}ms\``);
             break;
         }
     })
