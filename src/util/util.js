@@ -1,8 +1,8 @@
 module.exports = {
-    sleep: (ms) => {
+    sleep(ms) {
         return new Promise( res => setTimeout(res, ms));
     },
-    getRandomUserAgent: () => {
+    getRandomUserAgent() {
         const user_agents = [
             'Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko',
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36 OPR/72.0.3815.378',
@@ -16,5 +16,8 @@ module.exports = {
         ]
 
         return user_agents[Math.floor(Math.random() * user_agents.length)]
+    },
+    truncate(str, n) {
+        return (str.length > n) ? str.substr(0, n-1) + '...' : str;
     }
 }

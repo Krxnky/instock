@@ -10,7 +10,7 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin())
 
 const util = require('./src/util/util');
-const logger = require('./src/util/Logger');
+const {logger, Print} = require('./src/util/Logger');
 
 const Stores = require('./src/data/Stores');
 const ScanType = require('./src/enums/ScanType');
@@ -34,34 +34,39 @@ const sendNotification = (channel, avatar, username, name, productName, status, 
         .then((c) => c.send({ embed: embed, content: ':rotating_light: Stock Update :rotating_light: <@302599378332549121>' }));
 }
 
-const sendError = (avatar, username, product, error) => {
-    const embed = new Discord.MessageEmbed()
-    .setAuthor(username, avatar)
-    .setColor('#FA2C00')
-    .setTitle(`Error occurred whilst checking \`${product}\``)
-    .setDescription('```\n' + error.toString() + '\n```')
+const sendError = (store, product, error) => {
+    const errorString = `:warning: **Fatal Error!**\n\`Store: ${store.name}\nProduct: ${product.name}\` ${product.url}\n\n\`\`\`${error}\`\`\``;
 
     bot.channels.fetch(Channels.LOGS)
-        .then((c) => c.send(embed));
+        .then((c) => c.send(errorString));
 }
 
 (async () => {
     await bot.login(process.env.TOKEN);
     const browser = await puppeteer.launch({});
-
-    bot.channels.fetch(Channels.LOGS)
-        .then((c) => c.send('Anual checks started...'));
     
     bot.stock_check = 1;
+
+    console.log(`
+    SSSSS .sSSSs.  SSSSS .sSSSSs.       .sSSSSSSSSs.   .sSSSSs.    .sSSSSs.    .sSSS  SSSSS  
+    SSSSS SSSSS SS SSSSS SSSSSSSSSs. .sSSSSSSSSSSSSSs. SSSSSSSSSs. SSSSSSSSSs. SSSSS  SSSSS  
+    S SSS S SSS  \`sSSSSS S SSS SSSS' SSSSS S SSS SSSSS S SSS SSSSS S SSS SSSSS S SSS SSSSS   
+    S  SS S  SS    SSSSS S  SS       SSSSS S  SS SSSSS S  SS SSSSS S  SS SSSS' S  SS SSSSS   
+    S..SS S..SS    SSSSS \`SSSSsSSSa. \`:S:' S..SS \`:S:' S..SS SSSSS S..SS       S..SSsSSSSS   
+    S:::S S:::S    SSSSS .sSSS SSSSS       S:::S       S:::S SSSSS S:::S SSSSS S:::S SSSSS   
+    S;;;S S;;;S    SSSSS S;;;S SSSSS       S;;;S       S;;;S SSSSS S;;;S SSSSS S;;;S  SSSSS  
+    S%%%S S%%%S    SSSSS S%%%S SSSSS       S%%%S       S%%%S SSSSS S%%%S SSSSS S%%%S  SSSSS  
+    SSSSS SSSSS    SSSSS SSSSSsSSSSS       SSSSS       SSSSSsSSSSS SSSSSsSSSSS SSSSS   SSSSS
+    `)
+
+    logger.info(`ℹ enabled stores: ${Stores.filter((s) => s.enabled).map((store) => store.name).join(', ')}`)
     const loop = new CronJob('5 */1 * * * *', async () => {
-        console.clear();
-        logger.info(`Annual check #${bot.stock_check++}`)
-        logger.info(`Checking stock for: ${Stores.filter((s) => s.enabled).map((store) => store.name).join(', ')}`)
         for(const store of Stores.filter((s) => s.enabled)) {
-            console.time(store.name);
             const page = await browser.newPage();
             for (const product of store.products) {
-                logger.info(`(${store.name}): Checking ${product.name}`);
+                logger.info(
+                    Print.message('Checking stock...', product.name, store, true)
+                )
                 const results = [];
                 try {
                     if(store.request_delay) await util.sleep(store.request_delay);
@@ -99,13 +104,18 @@ const sendError = (avatar, username, product, error) => {
 
                             return Promise.resolve({ results: result, total: total });
                         }, store, product)
-                        logger.info(`(${store.name}) (${product.name}): Found ${productStatus.total}`);
+                        if(productStatus.total == 0) throw 'No products found';
+                        logger.info(
+                            Print.message(`Products Found: ${productStatus.total}`, product.name, store, true)
+                        )
                         productStatus.results.forEach((status) => results.push(status));
                     }
                     else if(store.type == ScanType.API) {
                         const res = await axios(product.url);
                         const items = _.get(res.data, store.selectors.item);
-                        logger.info(`(${store.name}) (${product.name}): Found ${items.length}`);
+                        logger.info(
+                            Print.message(`Found ${items.length} products`, product.name, store, true)
+                        )
                         items.forEach((item) => {
                             const status = _.get(item, store.selectors.status);
                             const productImage = _.get(item, store.selectors.image);
@@ -118,27 +128,39 @@ const sendError = (avatar, username, product, error) => {
                             }
                         })
                     }
-                    logger.info(`(${store.name}): Found ${results.length} in stock`)
-                    results.forEach((result) => {
-                        if(!timeoutManager.isTimedOut(result.url)) {
-                            timeoutManager.timeoutProduct(result.url);
-                            logger.info(`!!!RESTOCK!!! ${result.url} (${result.productName}) (${store.name}) `);
-                            sendNotification(product.channel, store.image, store.name, product.name, result.productName, result.status, result.price, result.productImage, result.url);
-                        }
-                    })
+                    if(results.length > 0) {
+                        results.forEach((result) => {
+                            if(!timeoutManager.isTimedOut(result.url)) {
+                                timeoutManager.timeoutProduct(result.url);
+                                logger.info(
+                                    Print.inStock(result.productName, store, true)
+                                )
+                                logger.info(
+                                    Print.productInStock(result.url)
+                                )
+                                logger.info(`ℹ Product timed out for ${timeoutManager.delay}ms`)
+                                sendNotification(product.channel, store.image, store.name, product.name, result.productName, result.status, result.price, result.productImage, result.url);
+                            }
+                        })
+                    } else {
+                        logger.info(
+                            Print.outOfStock(product.name, store, true)
+                        )
+                    }
                 } catch (error) {
-                    logger.error(`ERROR (${store.name}): ${product.name}: ${error}`);
-                    sendError(store.image, store.name, product.name, error);
+                    logger.error(
+                        Print.message(error, product.name, store, true)
+                    )
+                    sendError(store, product, error);
                 }
             }
             page.close();
-            console.timeEnd(store.name);
         }
     })
     loop.start();
 
     bot.on('message', async (message) => {
-        const prefix = '.';
+        const prefix = 't.';
         const messageArray = message.content.split(' ');
         const cmd = messageArray[0].toLowerCase();
         const args = messageArray.slice(1);
@@ -149,24 +171,35 @@ const sendError = (avatar, username, product, error) => {
         switch(cmd.slice(prefix.length)) {
             case 'stoploop': 
                 loop.stop();
-                message.channel.send(':white_check_mark: \`Stock loop ended...\`');
+                message.channel.send(':white_check_mark: **Success!**\n\`Stock Loop: Stopped\`');
             break;
 
             case 'startloop':
                 loop.start();
-                message.channel.send(':white_check_mark: \`Stock loop started...\`');
+                message.channel.send(':white_check_mark: **Success!**\n\`Stock Loop: Started\`');
             break;
 
             case 'setcron': 
-                if(args.length < 6) return message.channel.send(':x: \`Invalid cron time...\`')
+                if(args.length < 6) return message.channel.send(':x: **Error!**\n\`CronTime: Invalid\`')
                 loop.setTime(new CronTime(args.join(' ')));
-                message.channel.send(':white_check_mark: \`Cron time changed...\`');
+                message.channel.send(`:white_check_mark: **Success!**\n\`CronTime: ${args.join(' ')}\``);
             break;
 
             case 'nextcheck':
-                message.channel.send(`Next Stock Check: \`${loop.nextDate().utcOffset(-6).format('dddd hh:mm:ss')}\``)
+                message.channel.send(`:information_source: **Info**\n\`Next Check: ${loop.nextDate().utcOffset(-6).format('dddd hh:mm:ss')}\``)
+            break;
+
+            case 'togglestore':
+                const store = Stores.find((s) => s.name.toLowerCase() == args.join(' ').toLowerCase());
+                if(!store) return message.channel.send(':x: **Error!**\n\`Store Name: Invalid\`');
+
+                store.enabled = !store.enabled;
+                message.channel.send(`:white_check_mark: **Success!**\n\`Store: ${store.name}\nStatus: ${(store.enabled) ? 'Enabled' : 'Disabled'}\``);
             break;
         }
     })
+
+    bot.channels.fetch(Channels.LOGS)
+    .then((c) => c.send(`:arrows_counterclockwise: **InStock Started...**\n\`Enabled Stores: ${Stores.filter((s) => s.enabled).map((store) => store.name).join(', ')}\nNext Check: ${loop.nextDate().utcOffset(-6).format('dddd hh:mm:ss')}\nProduct Timeout: ${timeoutManager.delay}ms\``));
 
 })();
