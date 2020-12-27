@@ -5,7 +5,7 @@ module.exports = [
     {
         image: 'https://selfpublishingadvice.org/wp-content/uploads/2013/12/Amazon-01.png',
         name: 'Amazon',
-        enabled: true,
+        enabled: false,
         type: ScanType.SCRAPE,
         selectors: {
             item: {

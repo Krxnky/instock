@@ -72,10 +72,6 @@ const sendError = (store, product, error) => {
                     if(store.request_delay) await util.sleep(store.request_delay);
                     if(store.type == ScanType.SCRAPE) {
                         await page.goto(product.url);
-                        await page.setViewport({width: 1440, height: 900});
-                        const screenshot = await page.screenshot({type: 'png', fullPage: true})
-                        bot.channels.fetch(Channels.LOGS)
-                        .then((c) => c.send({files:[{attachment: screenshot, name: 'screenshot.png'}]}))
                         const productStatus = await page.evaluate((store, product) => {
                             const result = [];
                             let total = 0;
