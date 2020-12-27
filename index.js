@@ -18,19 +18,19 @@ const Channels = require('./src/enums/Channels');
 const bot = new Discord.Client();
 const timeoutManager = new TimeoutManger(30 * 60000);
 
-const sendNotification = (channel, avatar, username, name, productName, status, price, image, url) => {
+const sendNotification = (product, store, result) => {
     const embed = new Discord.MessageEmbed()
-    .setAuthor(username, avatar)
+    .setAuthor(store.name, store.image)
     .setColor('#5ACE7D')
-    .setThumbnail(image)
-    .setDescription(`[${productName}](${encodeURI(url)})`)
-    .addField('Product', encodeURI(url))
-    .addField('Price', (price) ? price : 'No price', true)
-    .addField('Status', status, true)
+    .setThumbnail(result.image)
+    .setDescription(result.name)
+    .addField('Links', `**Product** :arrow_right:\n${encodeURI(result.url)}${(store.addToCart) ? `\n\n\n**Add To Cart** :arrow_right:\n${util.formatAtc(result.url, store)}` : ''}`)
+    .addField('Price', result.price, true)
+    .addField('Status', result.status, true)
     .setTimestamp()
     .setFooter('Developed by Krxnky#1274')
 
-    bot.channels.fetch(channel)
+    bot.channels.fetch(product.channel)
         .then((c) => c.send({ embed: embed, content: ':rotating_light: Stock Update :rotating_light: <@302599378332549121>' }));
 }
 
@@ -80,34 +80,35 @@ const sendError = (store, product, error) => {
                                 total = items.length;
                                 for (const item of items) {
                                     const status = item.querySelector(store.selectors[product.type].status).textContent.trim();
-                                    const productImage = item.querySelector(store.selectors[product.type].image).src;
-                                    const productName = item.querySelector(store.selectors[product.type].name).textContent.trim();
-                                    if(!item.querySelector(store.selectors[product.type].price)) continue;
-                                    const price = item.querySelector(store.selectors[product.type].price).textContent.trim()
+                                    const image = item.querySelector(store.selectors[product.type].image).src;
+                                    const name = item.querySelector(store.selectors[product.type].name).textContent.trim();
+                                    const price = (item.querySelector(store.selectors[product.type].price)) ? item.querySelector(store.selectors[product.type].price).textContent.trim() : 'No price';
                                     const url = item.querySelector(store.selectors[product.type].url).href;
 
                                     if(!store.excluded_flags.includes(status) && store.included_flags.includes(status)) {
-                                        result.push({ productName, price, productImage, status, url });
+                                        result.push({ name, price, image, status, url });
                                     }
                                 }
                             } else if(product.type == 'item') {
-                                const status = document.querySelector(store.selectors[product.type].status).text().trim();
-                                const productImage = document.querySelector(store.selectors[product.type].image).attr('src');
-                                const productName = document.querySelector(store.selectors[product.type].name,).text();
-                                const price = document.querySelector(store.selectors[product.type].price).text().trim();
+                                const status = document.querySelector(store.selectors[product.type].status).textContent.trim();
+                                const image = document.querySelector(store.selectors[product.type].image).src;
+                                const name = document.querySelector(store.selectors[product.type].name).textContent.trim();
+                                const price = (document.querySelector(store.selectors[product.type].price)) ? document.querySelector(store.selectors[product.type].price).textContent.trim() : 'No price';
                                 const url = product.url;
             
                                 if(!store.excluded_flags.includes(status) && store.included_flags.includes(status)) {
-                                    result.push({ productName, price, productImage, status, url });
+                                    result.push({ name, price, image, status, url });
                                 }
                             }
 
                             return Promise.resolve({ results: result, total: total });
                         }, store, product)
-                        if(productStatus.total <= 0) throw 'No products found';
-                        logger.info(
-                            Print.message(`Products Found: ${productStatus.total}`, product.name, store, true)
-                        )
+                        if(product.type == 'search'){
+                            if(productStatus.total == 0) throw 'No products found';
+                            logger.info(
+                                Print.message(`Products Found: ${productStatus.total}`, product.name, store, true)
+                            )
+                        }
                         productStatus.results.forEach((status) => results.push(status));
                     }
                     else if(store.type == ScanType.API) {
@@ -118,13 +119,13 @@ const sendError = (store, product, error) => {
                         )
                         items.forEach((item) => {
                             const status = _.get(item, store.selectors.status);
-                            const productImage = _.get(item, store.selectors.image);
-                            const productName = _.get(item, store.selectors.name);
+                            const image = _.get(item, store.selectors.image);
+                            const name = _.get(item, store.selectors.name);
                             const price = _.get(item, store.selectors.price);
                             const url = _.get(item, store.selectors.url);
 
                             if(!store.excluded_flags.includes(status) && store.included_flags.includes(status)) {
-                                results.push({ productName, price, productImage, status, url });
+                                results.push({ name, price, image, status, url });
                             }
                         })
                     }
@@ -133,13 +134,13 @@ const sendError = (store, product, error) => {
                             if(!timeoutManager.isTimedOut(result.url)) {
                                 timeoutManager.timeoutProduct(result.url);
                                 logger.info(
-                                    Print.inStock(result.productName, store, true)
+                                    Print.inStock(result.name, store, true)
                                 )
                                 logger.info(
                                     Print.productInStock(result.url)
                                 )
                                 logger.info(`ℹ Product timed out for ${timeoutManager.delay}ms`)
-                                sendNotification(product.channel, store.image, store.name, product.name, result.productName, result.status, result.price, result.productImage, result.url);
+                                sendNotification(product, store, result);
                             }
                         })
                     } else {
@@ -148,6 +149,7 @@ const sendError = (store, product, error) => {
                         )
                     }
                 } catch (error) {
+                    console.error(error)
                     logger.error(
                         Print.message(error, product.name, store, true)
                     )

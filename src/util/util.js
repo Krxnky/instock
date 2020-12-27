@@ -1,3 +1,6 @@
+const util = require('util');
+const url = require('url');
+
 module.exports = {
     sleep(ms) {
         return new Promise( res => setTimeout(res, ms));
@@ -19,5 +22,9 @@ module.exports = {
     },
     truncate(str, n) {
         return (str.length > n) ? str.substr(0, n-1) + '...' : str;
-    }
+    },
+    formatAtc(productUrl, store) {
+        const productNum = url.parse(productUrl).pathname.match(store.addToCart.regex)[1];
+        return util.format(store.addToCart.baseUrl, productNum)
+    } 
 }

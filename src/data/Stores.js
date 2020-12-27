@@ -3,83 +3,61 @@ const Channels = require('../enums/Channels');
 
 module.exports = [
     {
-        image: 'https://pisces.bbystatic.com/image2/BestBuy_US/Gallery/BestBuy_Logo_2020-190616.png',
-        name: 'Best Buy',
-        type: ScanType.API,
+        image: 'https://selfpublishingadvice.org/wp-content/uploads/2013/12/Amazon-01.png',
+        name: 'Amazon',
         enabled: true,
-        request_delay: 5000,
-        selectors: {
-            item: 'products',
-            image: 'images[0].href',
-            status: 'orderable',
-            name: 'name',
-            price: 'regularPrice',
-            url: 'url'
-        },
-        excluded_flags: ['SoldOut', 'AutoNotify', 'ComingSoon'],
-        included_flags: ['Available'],
-        products: [
-            {
-                name: 'RTX 3070',
-                url: 'https://api.bestbuy.com/v1/products((search=rtx&search=3070)&(categoryPath.id=abcat0507002))?apiKey=ooXTLEqUWOQkyIR6WmdGuDqy&format=json',
-                channel: Channels.RTX_3070
-            },
-            {
-                name: 'RTX 3080',
-                url: 'https://api.bestbuy.com/v1/products((search=rtx&search=3080)&(categoryPath.id=abcat0507002))?apiKey=ooXTLEqUWOQkyIR6WmdGuDqy&format=json',
-                channel: Channels.RTX_3080
-            }
-        ]
-    },
-    {
-        image: 'https://c1.neweggimages.com/WebResource/Themes/2005/Nest/logo_424x210.png',
-        name: 'Newegg',
-        enabled: true,
-        request_delay: 2500,
         type: ScanType.SCRAPE,
         selectors: {
-            search: {
-                item: '.item-cell .item-container',
-                image: '.item-img img',
-                status: '.item-button-area',
-                name: '.item-title',
-                price: '.price-current',
-                url: '.item-title'
+            item: {
+                image: '#landingImage',
+                status: '#availability span',
+                name: '#productTitle',
+                price: '#priceblock_ourprice'
             }
         },
-        excluded_flags: ['Sold Out', 'Auto Notify', 'View Details'],
-        included_flags: ['Add to cart', 'Add To Cart', 'add to cart', 'Add to Cart'],
+        excluded_flags: ['Currently unavailable.'],
+        included_flags: ['In stock.'],
+        addToCart: {
+            baseUrl: 'https://www.amazon.com/gp/aws/cart/add-res.html?ASIN.1=%s&Quantity.1=1',
+            regex: /\/dp\/(.*)/
+        },
         products: [
             {
-                name: 'RTX 3070',
-                type: 'search',
-                url: 'https://www.newegg.com/p/pl?N=100007709%204841%20601357250',
+                name: 'evga xc3',
+                type: 'item',
+                url: 'https://www.amazon.com/dp/B08L8L71SM',
                 channel: Channels.RTX_3070
             },
             {
-                name: 'RTX 3080',
-                type: 'search',
-                url: 'https://www.newegg.com/p/pl?N=100007709%20601357247%204841',
-                channel: Channels.RTX_3080
-            },
-            {
-                name: 'RTX 3070 Combo',
-                type: 'search',
-                url: 'https://www.newegg.com/p/pl?d=rtx+3070+combo&N=31001489&isdeptsrh=1',
+                name: 'msi gaming x trio',
+                type: 'item',
+                url: 'https://www.amazon.com/dp/B08KWN2LZG',
                 channel: Channels.RTX_3070
             },
             {
-                name: 'RTX 3080 Combo',
-                type: 'search',
-                url: 'https://www.newegg.com/p/pl?d=rtx+3080+combo&N=31001489&isdeptsrh=1',
-                channel: Channels.RTX_3080
+                name: 'msi ventus 3x oc',
+                type: 'item',
+                url: 'https://www.amazon.com/dp/B08KWLMZV4',
+                channel: Channels.RTX_3070
+            },
+            {
+                name: 'evga ftw3 ultra',
+                type: 'item',
+                url: 'https://www.amazon.com/dp/B08L8L9TCZ',
+                channel: Channels.RTX_3070
+            },
+            {
+                name: 'asus tuf gaming',
+                type: 'item',
+                url: 'https://www.amazon.com/dp/B08L8KC1J7',
+                channel: Channels.RTX_3070
             }
         ]
     },
     {
         image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/B%26H_Foto_%26_Electronics_Logo.svg/1280px-B%26H_Foto_%26_Electronics_Logo.svg.png',
         name: 'B&H Photo',
-        enabled: true,
+        enabled: false,
         request_delay: 2500,
         type: ScanType.SCRAPE,
         selectors: {
@@ -110,9 +88,88 @@ module.exports = [
         ]
     },
     {
+        image: 'https://c1.neweggimages.com/WebResource/Themes/2005/Nest/logo_424x210.png',
+        name: 'Newegg',
+        enabled: true,
+        request_delay: 2500,
+        type: ScanType.SCRAPE,
+        selectors: {
+            search: {
+                item: '.item-cell .item-container',
+                productNum: '.item-features:nth-child(6)',
+                image: '.item-img img',
+                status: '.item-button-area',
+                name: '.item-title',
+                price: '.price-current',
+                url: '.item-title'
+            }
+        },
+        excluded_flags: ['Sold Out', 'Auto Notify', 'View Details'],
+        included_flags: ['Add to cart', 'Add To Cart', 'add to cart', 'Add to Cart'],
+        addToCart: {
+            baseUrl: 'https://secure.newegg.com/Shopping/AddtoCart.aspx?Submit=ADD&ItemList=%s',
+            regex: /\/p\/(.*)/
+        },
+        products: [
+            {
+                name: 'RTX 3070',
+                type: 'search',
+                url: 'https://www.newegg.com/p/pl?N=100007709%204841%20601357250',
+                channel: Channels.RTX_3070
+            },
+            {
+                name: 'RTX 3080',
+                type: 'search',
+                url: 'https://www.newegg.com/p/pl?N=100007709%20601357247%204841',
+                channel: Channels.RTX_3080
+            },
+            {
+                name: 'RTX 3070 Combo',
+                type: 'search',
+                url: 'https://www.newegg.com/p/pl?d=rtx+3070+combo&N=31001489&isdeptsrh=1',
+                channel: Channels.RTX_3070
+            },
+            {
+                name: 'RTX 3080 Combo',
+                type: 'search',
+                url: 'https://www.newegg.com/p/pl?d=rtx+3080+combo&N=31001489&isdeptsrh=1',
+                channel: Channels.RTX_3080
+            }
+        ]
+    },
+    {
+        image: 'https://pisces.bbystatic.com/image2/BestBuy_US/Gallery/BestBuy_Logo_2020-190616.png',
+        name: 'Best Buy',
+        type: ScanType.API,
+        enabled: false,
+        request_delay: 5000,
+        selectors: {
+            item: 'products',
+            image: 'images[0].href',
+            status: 'orderable',
+            name: 'name',
+            price: 'regularPrice',
+            url: 'url'
+        },
+        excluded_flags: ['SoldOut', 'AutoNotify', 'ComingSoon'],
+        included_flags: ['Available'],
+        products: [
+            {
+                name: 'RTX 3070',
+                url: 'https://api.bestbuy.com/v1/products((search=rtx&search=3070)&(categoryPath.id=abcat0507002))?apiKey=ooXTLEqUWOQkyIR6WmdGuDqy&format=json',
+                channel: Channels.RTX_3070
+            },
+            {
+                name: 'RTX 3080',
+                url: 'https://api.bestbuy.com/v1/products((search=rtx&search=3080)&(categoryPath.id=abcat0507002))?apiKey=ooXTLEqUWOQkyIR6WmdGuDqy&format=json',
+                channel: Channels.RTX_3080
+            }
+        ]
+    },
+    {
         image: 'https://logodix.com/logo/695365.png',
         name: 'Micro Center',
-        enabled: true,
+        enabled: false,
         request_delay: 1000,
         type: ScanType.SCRAPE,
         selectors: {
