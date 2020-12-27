@@ -57,7 +57,7 @@ module.exports = [
     {
         image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/B%26H_Foto_%26_Electronics_Logo.svg/1280px-B%26H_Foto_%26_Electronics_Logo.svg.png',
         name: 'B&H Photo',
-        enabled: false,
+        enabled: true,
         request_delay: 2500,
         type: ScanType.SCRAPE,
         selectors: {
@@ -141,7 +141,7 @@ module.exports = [
         image: 'https://pisces.bbystatic.com/image2/BestBuy_US/Gallery/BestBuy_Logo_2020-190616.png',
         name: 'Best Buy',
         type: ScanType.API,
-        enabled: false,
+        enabled: true,
         request_delay: 5000,
         selectors: {
             item: 'products',
@@ -169,7 +169,7 @@ module.exports = [
     {
         image: 'https://logodix.com/logo/695365.png',
         name: 'Micro Center',
-        enabled: false,
+        enabled: true,
         request_delay: 1000,
         type: ScanType.SCRAPE,
         selectors: {
